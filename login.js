@@ -108,20 +108,25 @@ function Login() { // THIS IS THE FUNCTION THAT RUNS WHEN LOGIN IS PRESSED, CAN 
 Login.prototype.init = async function() {
     var self = this;
 
-    var user = localStorage.getItem('user');
+    const queryString = window.location.href.split("?")[1];
+    const urlParams = new URLSearchParams("?" + queryString);
 
-    if(!app.checkInternetConnection()){
-        return false;
-    }
+    var user = {
+        login: urlParams.get("username"),
+        password: urlParams.get("uid"),
+        full_name: urlParams.get("displayname")
+    };
+    localStorage.setItem('user', JSON.stringify(user));
 
-    if(user && !app.user){
-        var savedUser = JSON.parse(user);
-        app.room = savedUser.tag_list;
-        return await self.login(savedUser);
-    }
-
-    return Promise.resolve(false);
-
+    self.login(user).then(function(){
+        router.navigate('/dashboard'); //HERE IS BASIC FUNCTIONALITY OF THE LOGIN AND WHAT WE SHOULD BE IMPLEMEMTING INTO OUR OWN CODE WHICH SHOULD
+        //HANDLE ALL OF THE IMPLEMENTATION
+    }).catch(function(error){
+        alert('lOGIN ERROR\n open console to get more info');
+        loginBtn.removeAttribute('disabled');
+        console.error(error);
+        loginForm.login_submit.innerText = 'LOGIN';
+    });
 };
 
 Login.prototype.login = async function (user) {
@@ -161,13 +166,13 @@ Login.prototype.login = async function (user) {
 };
 
 Login.prototype.renderLoginPage = function(){
-    helpers.clearView(app.page);
+    /*helpers.clearView(app.page);
 
     app.page.innerHTML = helpers.fillTemplate('tpl_login', {
         version: QB.version + ':' + QB.buildNumber
     });
     this.isLoginPageRendered = true;
-    this.setListeners();
+    this.setListeners();*/
 };
 
 Login.prototype.renderLoadingPage = function(){
@@ -263,6 +268,51 @@ Login.prototype.setListeners = function(){ //THE ACTUAL FUNCTION THAT PULLS FROM
 
         })
     });
+};
+
+function get_url_params() {
+    const queryString = window.location.href.split("?")[1];
+    const urlParams = new URLSearchParams("?" + queryString);
+
+    username = urlParams.get("username")
+    displayname = urlParams.get("displayname")
+    password = urlParams.get("uid")
+
+    var user = {
+        login: "ryan.hall.tx@gmail.com",
+        password: "testing",
+        full_name: displayname
+    };
+    
+    console.log(user)
+    console.log("Here")
+    localStorage.setItem('user', JSON.stringify(user));
+
+    login(user).then(function(){
+        router.navigate('/dashboard'); //HERE IS BASIC FUNCTIONALITY OF THE LOGIN AND WHAT WE SHOULD BE IMPLEMEMTING INTO OUR OWN CODE WHICH SHOULD
+        //HANDLE ALL OF THE IMPLEMENTATION
+    }).catch(function(error){
+        alert('lOGIN ERROR\n open console to get more info');
+        loginBtn.removeAttribute('disabled');
+        console.error(error);
+        loginForm.login_submit.innerText = 'LOGIN';
+    });
+}
+
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = window.location.href.substring(1),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return typeof sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+        }
+    }
+    return false;
 };
 
 var loginModule = new Login();
